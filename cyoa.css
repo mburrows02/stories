@@ -1,0 +1,15 @@
+.map-container {
+  width: calc(100vw - 30px);
+  height: calc(100vh - 57px);
+  border-left: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+}
+
+#options>button {
+	margin: 0 10px 0 10px;
+}
+
+.file-button {
+	width: 100px;
+}

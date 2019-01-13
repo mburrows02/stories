@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+<head>
+  <title>A Story</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <link href="cyoa.css" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <!-- Navbar -->
+    <ul class="nav nav-tabs" id="storyTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" id="file-tab" data-toggle="tab" href="#file" role="tab" aria-controls="file" aria-selected="false">File</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="visualize-tab" data-toggle="tab" href="#visualize" role="tab" aria-controls="visualize" aria-selected="false">Visualize</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="build-tab" data-toggle="tab" href="#build" role="tab" aria-controls="build" aria-selected="false">Build</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="play-tab" data-toggle="tab" href="#play" role="tab" aria-controls="play" aria-selected="false">Play</a>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="storyTabContent">
+      <!-- File tab -->
+      <div class="tab-pane fade" id="file" role="tabpanel" aria-labelledby="file-tab">
+        <div class="row justify-content-center">
+          <div class="col-md-6 col-12">
+            <br>
+            <div class="card">
+              <div class="card-body">
+                <p class="text-center">Upload a file to resume a story, or save your current story for later.</p>
+                <div class="row pb-3">
+                  <div class="col">
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="fileInput">
+                      <label class="custom-file-label" for="fileInput">Choose file</label>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <form id="uploadForm">
+                      <button class="btn btn-primary file-button float-right" onclick="upload()" id="uploadButton">Upload</button>
+                    </form>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <input id="storyName" type="text" class="form-control" value="My Story">
+                  </div>
+                  <div class="col">
+                    <button class="btn btn-primary file-button float-right" onclick="download()" id="downloadButton">Download</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualize tab -->
+      <div class="tab-pane fade" id="visualize" role="tabpanel" aria-labelledby="visualize-tab">
+        <div class="row">
+          <div class="col">
+            <div id="map" class="map-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Build tab -->
+      <div class="tab-pane fade" id="build" role="tabpanel" aria-labelledby="build-tab">
+        <div class="row">
+          <div class="col">
+            <br>
+            <div class="card" id="prevCard" hidden>
+              <div class="card-body">
+                <p id="prevLabel"></p> 
+                <button class="btn btn-primary" onclick="goBack()">Back</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <br>
+            <div class="card">
+              <div class="card-body" id="currCard">
+                <div class="form-group">
+                  <textarea class="form-control" id="currLabel" rows="6"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveCurrentLabel()">Update</button>
+                <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" id="nextCardTemplate" hidden>
+            <div class="card-header">
+              <div class="form-row justify-content-between">
+                <div class="col">
+                  <input type="text" name="edgeLabel">
+                </div>
+                <div class="col">
+                  <button class="btn btn-primary float-right" name="saveEdgeLabel">Update</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <p name="nextLabel"></p>
+              <button class="btn btn-primary" name="selectNext">Select</button>
+            </div>
+          </div>
+          <div class="col" id="nextCol">
+            <br>
+          </div>
+        </div>
+      </div>
+
+      <!-- Play tab -->
+      <div class="tab-pane fade" id="play" role="tabpanel" aria-labelledby="play-tab">
+        <div class="row justify-content-center">
+          <div class="col-md-4 col-8 text-center ">
+            <br>
+            <div class="card">
+              <div class="card-body">
+                <p id="text"></p>
+                <span id="options"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addEdgeModal" tabindex="-1" role="dialog" aria-labelledby="addEdgeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addEdgeModalLabel">Add Option</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newOptionText">Option Text</label>
+            <input type="text" id="newOptionText">
+          </div>
+          <div class="form-group">
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" name="toNodeType" id="toNewNode" value="new" checked onchange="selectNewTarget()">
+              <label class="custom-control-label" for="toNewNode">
+                New
+              </label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" name="toNodeType" id="toExistingNode" value="existing" onchange="selectExistingTarget()">
+              <label class="custom-control-label" for="toExistingNode">
+                Existing
+              </label>
+            </div>
+            <textarea class="form-control" id="newNodeLabel"></textarea>
+            <select class="custom-select" id="existingNodeSelector" hidden></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" onclick="saveNewOption()"class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
+  <script src="cyoa-data.js"></script>
+  <script src="cyoa-visualize.js"></script>
+  <script src="cyoa-build.js"></script>
+  <script src="cyoa-play.js"></script>
+  <script src="cyoa.js"></script>
+</body>
+</html>
