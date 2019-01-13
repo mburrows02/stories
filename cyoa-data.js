@@ -1,6 +1,7 @@
+var data;
 initData();
 function initData() {
-  var data = {};
+  data = {};
   data.nodes = [
     { id: 0, label: 'The story starts here...' },
     { id: 1, label: 'And ends here. Write your own!', success: true }
