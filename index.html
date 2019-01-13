@@ -85,10 +85,10 @@
             <div class="card" id="prevCard" hidden>
               <div class="card-header">
                 <span id="prevOption" class="card-title"></span>
+                <button class="btn btn-primary float-right" onclick="goBack()">Back</button>
               </div>
               <div class="card-body">
                 <p id="prevLabel"></p> 
-                <button class="btn btn-primary" onclick="goBack()">Back</button>
               </div>
             </div>
           </div>
@@ -97,9 +97,8 @@
             <div class="card">
               <div class="card-body" id="currCard">
                 <div class="form-group">
-                  <textarea class="form-control" id="currLabel" rows="6"></textarea>
+                  <textarea class="form-control" id="currLabel" onblur="saveCurrentLabel()" rows="6"></textarea>
                 </div>
-                <button class="btn btn-primary" onclick="saveCurrentLabel()">Update</button>
                 <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
               </div>
             </div>
@@ -111,13 +110,12 @@
                   <input type="text" name="edgeLabel">
                 </div>
                 <div class="col">
-                  <button class="btn btn-primary float-right" name="saveEdgeLabel">Update</button>
+                  <button class="btn btn-primary float-right" name="selectNext">Select</button>
                 </div>
               </div>
             </div>
             <div class="card-body">
               <p name="nextLabel"></p>
-              <button class="btn btn-primary" name="selectNext">Select</button>
             </div>
           </div>
           <div class="col" id="nextCol">

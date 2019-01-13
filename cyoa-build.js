@@ -47,8 +47,9 @@ function updateBuildPage() {
     card.removeAttribute('id');
     card.removeAttribute('hidden');
 
-    card.querySelector("[name='edgeLabel'").value = edge.label;
-    card.querySelector("[name='saveEdgeLabel'").onclick = function(e) {
+    var edgeLabelBox = card.querySelector("[name='edgeLabel'");
+    edgeLabelBox.value = edge.label;
+    edgeLabelBox.onblur = function(e) {
       saveEdgeLabel(e, edge);
     }
 
@@ -78,15 +79,11 @@ function saveEdgeLabel(event, edge) {
 function selectNewTarget() {
   document.getElementById('existingNodeSelector').setAttribute('hidden', '');
   document.getElementById('newNodeLabel').remomveAttribute('hidden');
-  //document.getElementById('toNewNode').setAttribute('checked', '');
-  //document.getElementById('toExistingNode').removeAttribute('checked');
 }
 
 function selectExistingTarget() {
   document.getElementById('newNodeLabel').setAttribute('hidden', '');
   document.getElementById('existingNodeSelector').removeAttribute('hidden');
-  //document.getElementById('toExistingNode').setAttribute('checked', '');
-  //document.getElementById('toNewNode').removeAttribute('checked');
   var select = document.getElementById('existingNodeSelector');
   clearElement(select);
   data.nodes.forEach(function(node) {
