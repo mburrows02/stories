@@ -1,12 +1,14 @@
-var data = {};
-data.nodes = [
-  { id: 0, label: 'The story starts here...' },
-  { id: 1, label: 'And ends here. Write your own!', success: true }
-];
-
-data.edges = [
-  { from: 0, to: 1, label: "Continue"}
-];
+initData();
+function initData() {
+  var data = {};
+  data.nodes = [
+    { id: 0, label: 'The story starts here...' },
+    { id: 1, label: 'And ends here. Write your own!', success: true }
+  ];
+  data.edges = [
+    { from: 0, to: 1, label: "Continue"}
+  ];
+}
 
 function findNode(nodeId) {
   var node = data.nodes.find(n => n.id === nodeId);
@@ -65,6 +67,11 @@ function download() {
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
+}
+
+function reset() {
+  localStorage.removeItem("data");
+  initData();
 }
 
 function getNextId() {
