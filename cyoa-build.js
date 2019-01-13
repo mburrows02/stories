@@ -9,25 +9,28 @@ function clearElement(elem) {
 }
 
 function initBuildPage() {
+  build.prev = [];
   build.curr = 0;
   updateBuildPage();
 }
 
 function goToNode(nodeId) {
-  build.prev.push(build.curr);
+  build.prev.push({node: build.curr, edge: findEdge(build.curr, nodeId).label});
   build.curr = nodeId;
   updateBuildPage();
 }
 
 function goBack() {
-  build.curr = build.prev.pop();
+  build.curr = build.prev.pop().node;
   updateBuildPage();
 }
 
 function updateBuildPage() {
   if (build.prev.length) {
-    var prevNode = findNode(build.prev[build.prev.length - 1]);
+    var prev = build.prev[build.prev.length - 1];
+    var prevNode = findNode(prev.node);
     document.getElementById('prevCard').removeAttribute('hidden');
+    document.getElementById('prevOption').innerText = prev.edge;
     document.getElementById('prevLabel').innerText = prevNode.label;
   } else {
     document.getElementById('prevCard').setAttribute('hidden', '');

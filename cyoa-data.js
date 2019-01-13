@@ -16,6 +16,10 @@ function findNode(nodeId) {
   return node;
 }
 
+function findEdge(fromId, toId) {
+  return data.edges.find(e => e.from === fromId && e.to === toId);
+}
+
 function findEdgesFromNode(nodeId) {
   var edgesFromNode = data.edges.filter(e => e.from === nodeId);
   return edgesFromNode;
