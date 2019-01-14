@@ -12,8 +12,7 @@ function initData() {
 }
 
 function findNode(nodeId) {
-  var node = data.nodes.find(n => n.id === nodeId);
-  return node;
+  return data.nodes.find(n => n.id === nodeId);
 }
 
 function findEdge(fromId, toId) {
@@ -21,8 +20,11 @@ function findEdge(fromId, toId) {
 }
 
 function findEdgesFromNode(nodeId) {
-  var edgesFromNode = data.edges.filter(e => e.from === nodeId);
-  return edgesFromNode;
+  return data.edges.filter(e => e.from === nodeId);
+}
+
+function findEdgesToNode(nodeId) {
+  return data.edges.filter(e => e.to === nodeId);
 }
 
 function dataToString() {

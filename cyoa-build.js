@@ -41,25 +41,28 @@ function updateBuildPage() {
   var nextCol = document.getElementById('nextCol');
   clearElement(nextCol);
   var nextOptions = findEdgesFromNode(build.curr);
-  nextOptions.forEach(function(edge) {
+  nextOptions.forEach(addOptionCard); 
+}
+
+function addOptionCard(edge) {
     var otherNode = findNode(edge.to);
     var card = nextCardTemplate.cloneNode(true);
     card.removeAttribute('id');
     card.removeAttribute('hidden');
-
     var edgeLabelBox = card.querySelector("[name='edgeLabel'");
     edgeLabelBox.value = edge.label;
     edgeLabelBox.onblur = function(e) {
       saveEdgeLabel(e, edge);
     }
-
     card.querySelector("[name='nextLabel']").innerText = otherNode.label;
     card.querySelector("[name='selectNext']").onclick = function() {
       goToNode(otherNode.id);
     }
+    card.querySelector("[name='deleteButton'").onclick = function() {
+      deleteEdge(edge);
+    }
     nextCol.append(document.createElement('br'));
     nextCol.append(card);
-  }); 
 }
 
 function saveCurrentLabel() {
@@ -117,4 +120,14 @@ function saveNewOption() {
   saveToLocalStorage();
   $('#addEdgeModal').modal('hide');
   updateBuildPage();
+}
+
+function deleteEdge(edge) {
+  var destNode = findNode(edge.to);
+  data.edges.splice(data.edges.indexOf(edge), 1);
+  var edgesFrom = findEdgesFromNode(destNode.id).length;
+  var edgesTo = findEdgesToNode(destNode.id).length;
+  if (edgesFrom === 0 && edgesTo === 0) {
+    data.nodes.splice(data.nodes.indexOf(destNode), 1);
+  }
 }
