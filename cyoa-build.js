@@ -130,4 +130,6 @@ function deleteEdge(edge) {
   if (edgesFrom === 0 && edgesTo === 0) {
     data.nodes.splice(data.nodes.indexOf(destNode), 1);
   }
+  saveToLocalStorage();
+  updateBuildPage();
 }
