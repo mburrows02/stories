@@ -41,7 +41,13 @@ function updateBuildPage() {
   var nextCol = document.getElementById('nextCol');
   clearElement(nextCol);
   var nextOptions = findEdgesFromNode(build.curr);
-  nextOptions.forEach(addOptionCard); 
+  nextOptions.forEach(addOptionCard);
+  if (nextOptions.length > 0) {
+    var upButtons = nextCol.querySelectorAll("[name='moveUpButton']");
+    upButtons.item(0).setAttribute("hidden", "");
+    var downButtons = nextCol.querySelectorAll("[name='moveDownButton']");
+    downButtons.item(downButtons.length - 1).setAttribute("hidden", "");
+  }
 }
 
 function addOptionCard(edge) {
@@ -51,16 +57,12 @@ function addOptionCard(edge) {
     card.removeAttribute('hidden');
     var edgeLabelBox = card.querySelector("[name='edgeLabel'");
     edgeLabelBox.value = edge.label;
-    edgeLabelBox.onblur = function(e) {
-      saveEdgeLabel(e, edge);
-    }
+    edgeLabelBox.onblur = e => saveEdgeLabel(e, edge);
     card.querySelector("[name='nextLabel']").innerText = otherNode.label;
-    card.querySelector("[name='selectNext']").onclick = function() {
-      goToNode(otherNode.id);
-    }
-    card.querySelector("[name='deleteButton'").onclick = function() {
-      deleteEdge(edge);
-    }
+    card.querySelector("[name='selectNext']").onclick = () => goToNode(otherNode.id);
+    card.querySelector("[name='moveUpButton'").onclick = () => moveEdge(edge, true);
+    card.querySelector("[name='moveDownButton'").onclick = () => moveEdge(edge, false);
+    card.querySelector("[name='deleteButton'").onclick = () => deleteEdge(edge);
     nextCol.append(document.createElement('br'));
     nextCol.append(card);
 }
@@ -132,4 +134,22 @@ function deleteEdge(edge) {
   }
   saveToLocalStorage();
   updateBuildPage();
+}
+
+function moveEdge(edge, up) {
+  var edgeIndex = data.edges.indexOf(edge);
+  var inc = up ? -1 : 1;
+  var moved = false;
+  for (var i = edgeIndex + inc; i >= 0 && i < data.edges.length; i += inc) {
+    if (data.edges[i].from === edge.from) {
+      data.edges.splice(data.edges.indexOf(edge), 1);
+      data.edges.splice(i, 0, edge);
+      moved = true;
+      break;
+    }
+  }
+  if (moved) {
+    saveToLocalStorage();
+    updateBuildPage();
+  }
 }

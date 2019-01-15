@@ -53,7 +53,6 @@ function upload() {
   }
 
   var fr = new FileReader();
-
   fr.onload = function(e) {
     var fileStr = e.target.result;
     if (initDataFromString(fileStr)) {
