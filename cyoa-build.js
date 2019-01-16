@@ -48,6 +48,14 @@ function updateBuildPage() {
     var downButtons = nextCol.querySelectorAll("[name='moveDownButton']");
     downButtons.item(downButtons.length - 1).setAttribute("hidden", "");
   }
+  var select = document.getElementById('existingNodeSelector');
+  clearElement(select);
+  data.nodes.forEach(function(node) {
+    var opt = document.createElement('option');
+    opt.innerText = node.label;
+    opt.value = node.id;
+    select.append(opt);
+  });
 }
 
 function addOptionCard(edge) {
@@ -72,6 +80,7 @@ function saveCurrentLabel() {
   var currNode = findNode(build.curr);
   currNode.label = labelText;
   saveToLocalStorage();
+  updateBuildPage();
 }
 
 function saveEdgeLabel(event, edge) {
@@ -83,20 +92,12 @@ function saveEdgeLabel(event, edge) {
 
 function selectNewTarget() {
   document.getElementById('existingNodeSelector').setAttribute('hidden', '');
-  document.getElementById('newNodeLabel').remomveAttribute('hidden');
+  document.getElementById('newNodeLabel').removeAttribute('hidden');
 }
 
 function selectExistingTarget() {
   document.getElementById('newNodeLabel').setAttribute('hidden', '');
   document.getElementById('existingNodeSelector').removeAttribute('hidden');
-  var select = document.getElementById('existingNodeSelector');
-  clearElement(select);
-  data.nodes.forEach(function(node) {
-    var opt = document.createElement('option');
-    opt.innerText = node.label;
-    opt.value = node.id;
-    select.append(opt);
-  });
 }
 
 function saveNewOption() {
