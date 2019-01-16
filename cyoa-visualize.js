@@ -1,11 +1,18 @@
 var options = {
   edges: {
-    font: { size: 12 },
+    font: { 
+      size: 12,
+      align: 'horizontal'
+    },
     widthConstraint: { maximum: 90 },
     arrows: {
       to: { enabled: true }
     },
-    smooth: { enabled: false }
+    smooth: { 
+      enabled: true,
+      type: 'curvedCW',
+      roundness: .25
+    }
   },
   nodes: {
     shape: 'box',
@@ -13,13 +20,6 @@ var options = {
     widthConstraint: { maximum: 200 }
   },
   physics: { enabled: false },
-  layout: {
-      hierarchical: {
-          direction: 'LR',
-          levelSeparation: 300,
-          edgeMinimization: false
-      }
-  },
   interaction: {
     keyboard: true
   }
