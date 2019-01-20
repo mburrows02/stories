@@ -25,3 +25,29 @@ var options = {
   }
 };
 var network;
+
+function initNetwork() {
+  var container = document.getElementById('map');
+  network = new vis.Network(container, data, options);
+  savePositions(network.getPositions());
+  network.on("dragEnd", function(params) {
+    var movedId = this.getNodeAt(params.pointer.DOM);
+    if (movedId) {
+      var movedNode = findNode(movedId);
+      var nodePosition = this.getPositions(movedId);
+      movedNode.x = nodePosition[movedId].x;
+      movedNode.y = nodePosition[movedId].y;
+      saveToLocalStorage();
+    }
+  });
+}
+
+function savePositions(positions) {
+  data.nodes.forEach(function(node) {
+    if (positions[node.id]) {
+      node.x = positions[node.id].x;
+      node.y = positions[node.id].y;
+    }
+  });
+  saveToLocalStorage();
+}
