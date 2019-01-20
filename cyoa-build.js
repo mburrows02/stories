@@ -11,11 +11,12 @@ function clearElement(elem) {
 function initBuildPage() {
   build.prev = [];
   build.curr = 0;
-  updateBuildPage();
 }
 
 function goToNode(nodeId) {
-  build.prev.push({node: build.curr, edge: findEdge(build.curr, nodeId).label});
+  if (build.curr) {
+    build.prev.push({node: build.curr, edge: findEdge(build.curr, nodeId).label});
+  }
   build.curr = nodeId;
   updateBuildPage();
 }
@@ -26,6 +27,9 @@ function goBack() {
 }
 
 function updateBuildPage() {
+  if (build.curr === undefined) {
+    initBuildPage();
+  }
   if (build.prev.length) {
     var prev = build.prev[build.prev.length - 1];
     var prevNode = findNode(prev.node);

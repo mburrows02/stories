@@ -40,6 +40,13 @@ function initNetwork() {
       saveToLocalStorage();
     }
   });
+  network.on("doubleClick", function(params) {
+    if (params.nodes.length > 0) {
+      initBuildPage();
+      build.curr = params.nodes[0];
+      $('#build-tab').tab('show');
+    }
+  });
 }
 
 function savePositions(positions) {

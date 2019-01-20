@@ -4,7 +4,7 @@ $('.nav-link').on('shown.bs.tab', function (e) {
   } else if (e.target.id === 'play-tab') {
     play();
   } else if (e.target.id === 'build-tab') {
-    initBuildPage();
+    updateBuildPage();
   }
 });
 
