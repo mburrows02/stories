@@ -14,7 +14,7 @@ function initBuildPage() {
 }
 
 function goToNode(nodeId) {
-  if (build.curr) {
+  if (build.curr !== undefined) {
     build.prev.push({node: build.curr, edge: findEdge(build.curr, nodeId).label});
   }
   build.curr = nodeId;
