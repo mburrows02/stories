@@ -21,12 +21,14 @@ function renderEdges(node) {
   var optionsContainer = document.getElementById('options');
   var edgesFromNode = findEdgesFromNode(node.id);
   edgesFromNode.forEach(function(edge) {
+    var p = document.createElement('p');
     var btn = document.createElement('button');
     btn.onclick = function() {
       renderNode(edge.to);
     }
     btn.innerText = edge.label;
-    btn.setAttribute('class', 'btn btn-primary');
-    optionsContainer.append(btn);
+    btn.setAttribute('class', 'btn btn-primary btn-block');
+    p.append(btn);
+    optionsContainer.append(p);
   });
 }
