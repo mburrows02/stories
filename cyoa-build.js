@@ -125,6 +125,8 @@ function saveNewOption() {
   }
   data.edges.push(newEdge);
   saveToLocalStorage();
+  document.getElementById('newOptionText').value = '';
+  document.getElementById('newNodeLabel').value = '';
   $('#addEdgeModal').modal('hide');
   updateBuildPage();
 }
