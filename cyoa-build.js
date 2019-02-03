@@ -67,9 +67,19 @@ function addOptionCard(edge) {
     var card = nextCardTemplate.cloneNode(true);
     card.removeAttribute('id');
     card.removeAttribute('hidden');
-    var edgeLabelBox = card.querySelector("[name='edgeLabel'");
-    edgeLabelBox.value = edge.label;
-    edgeLabelBox.onblur = e => saveEdgeLabel(e, edge);
+
+    card.querySelectorAll('input').forEach(function(input) {
+      input.onblur = e => saveEdge(e, edge);
+    });
+    card.querySelectorAll('select').forEach(function(input) {
+      input.onchange = e => saveEdge(e, edge);
+    });
+    card.querySelector("[name='edgeLabel'").value = edge.label;
+    card.querySelector("[name='edgeSetFlag'").value = edge.set ? edge.set.name : '';
+    card.querySelector("[name='edgeSetFlagValue'").value = edge.set ? '' + edge.set.value : null;
+    card.querySelector("[name='edgeRequiresFlag'").value = edge.requires ? edge.requires.name : '';
+    card.querySelector("[name='edgeRequiresFlagValue'").value = edge.requires ? '' + edge.requires.value : null;
+
     card.querySelector("[name='nextLabel']").innerText = otherNode.label;
     card.querySelector("[name='selectNext']").onclick = () => goToNode(otherNode.id);
     card.querySelector("[name='moveUpButton'").onclick = () => moveEdge(edge, true);
@@ -79,6 +89,8 @@ function addOptionCard(edge) {
     nextCol.append(card);
 }
 
+/** EDIT FUNCTIONS **/
+
 function saveCurrentLabel() {
   var labelText = document.getElementById('currLabel').value;
   var currNode = findNode(build.curr);
@@ -87,48 +99,16 @@ function saveCurrentLabel() {
   updateBuildPage();
 }
 
-function saveEdgeLabel(event, edge) {
-  var parent = event.target.parentNode.parentNode;
-  var newLabel = parent.querySelector("[name='edgeLabel']").value;
-  edge.label = newLabel;
+function saveEdge(event, edge) {
+  var parent = event.target.closest('.card');
+  edge.label = parent.querySelector("[name='edgeLabel']").value;
+  var setName = parent.querySelector("[name='edgeSetFlag'").value;
+  var setValue = parent.querySelector("[name='edgeSetFlagValue'").value === 'true';
+  edge.set = setName ? { name: setName, value: setValue } : null;
+  var requiresName = parent.querySelector("[name='edgeRequiresFlag'").value;
+  var requiresValue = parent.querySelector("[name='edgeRequiresFlagValue'").value === 'true';
+  edge.requires = requiresName ? { name: requiresName, value: requiresValue } : null;
   saveToLocalStorage();
-}
-
-function selectNewTarget() {
-  document.getElementById('existingNodeSelector').setAttribute('hidden', '');
-  document.getElementById('newNodeLabel').removeAttribute('hidden');
-}
-
-function selectExistingTarget() {
-  document.getElementById('newNodeLabel').setAttribute('hidden', '');
-  document.getElementById('existingNodeSelector').removeAttribute('hidden');
-}
-
-function saveNewOption() {
-  var newEdgeLabel = document.getElementById('newOptionText').value;
-  var destNodeType = document.querySelector('[name="toNodeType"]:checked').value;
-  var destNodeId;
-  if (destNodeType === 'new') {
-    destNodeId = getNextId();
-    var newNode = {
-      id: destNodeId,
-      label: document.getElementById('newNodeLabel').value
-    };
-    data.nodes.push(newNode);
-  } else {
-    destNodeId = parseInt(document.getElementById('existingNodeSelector').value);
-  }
-  var newEdge = {
-    to: destNodeId,
-    from: build.curr,
-    label: newEdgeLabel
-  }
-  data.edges.push(newEdge);
-  saveToLocalStorage();
-  document.getElementById('newOptionText').value = '';
-  document.getElementById('newNodeLabel').value = '';
-  $('#addEdgeModal').modal('hide');
-  updateBuildPage();
 }
 
 function deleteEdge(edge) {
@@ -159,4 +139,61 @@ function moveEdge(edge, up) {
     saveToLocalStorage();
     updateBuildPage();
   }
+}
+
+/** ADD FUNCTIONS **/
+
+function selectNewTarget() {
+  document.getElementById('existingNodeSelector').setAttribute('hidden', '');
+  document.getElementById('newNodeLabel').removeAttribute('hidden');
+}
+
+function selectExistingTarget() {
+  document.getElementById('newNodeLabel').setAttribute('hidden', '');
+  document.getElementById('existingNodeSelector').removeAttribute('hidden');
+}
+
+function saveNewOption() {
+  var destNodeId = addOrFindNodeForNewOption();
+  addEdgeForNewOption(destNodeId);
+  saveToLocalStorage();
+  [].forEach.call(document.getElementsByClassName('new-option-field'), e => e.value = '');
+  $('#addEdgeModal').modal('hide');
+  updateBuildPage();
+}
+
+function addOrFindNodeForNewOption() {
+  var destNodeType = document.querySelector('[name="toNodeType"]:checked').value;
+  var destNodeId;
+  if (destNodeType === 'new') {
+    destNodeId = getNextId();
+    var newNode = {
+      id: destNodeId,
+      label: document.getElementById('newNodeLabel').value
+    };
+    data.nodes.push(newNode);
+  } else {
+    destNodeId = parseInt(document.getElementById('existingNodeSelector').value);
+  }
+  return destNodeId;
+}
+
+function addEdgeForNewOption(destNodeId) {
+  var newEdgeLabel = document.getElementById('newOptionText').value;
+  var newEdge = {
+    to: destNodeId,
+    from: build.curr,
+    label: newEdgeLabel
+  }
+  var setFlag = document.getElementById('newOptionFlag').value;
+  if (setFlag) {
+    var setFlagValue = document.getElementById('newOptionFlagValue').value;
+    newEdge.set = { name: setFlag, value: setFlagValue==='true' };
+  }
+  var requiresFlag = document.getElementById('newOptionRequires').value;
+  if (requiresFlag) {
+    var requiresFlagValue = document.getElementById('newOptionRequiresValue').value;
+    newEdge.requires = { name: requiresFlag, value: requiresFlagValue==='true' };
+  }
+  data.edges.push(newEdge);
 }
