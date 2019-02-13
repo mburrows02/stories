@@ -62,7 +62,7 @@ function updateBuildPage() {
   });
 }
 
-function addOptionCard(edge) {
+function addOptionCard(edge, i) {
     var otherNode = findNode(edge.to);
     var card = nextCardTemplate.cloneNode(true);
     card.removeAttribute('id');
@@ -85,6 +85,11 @@ function addOptionCard(edge) {
     card.querySelector("[name='moveUpButton'").onclick = () => moveEdge(edge, true);
     card.querySelector("[name='moveDownButton'").onclick = () => moveEdge(edge, false);
     card.querySelector("[name='deleteButton'").onclick = () => deleteEdge(edge);
+
+    card.querySelector(".collapse").id = "nextOptionCollapse" + i;
+    card.querySelector(".collapse").setAttribute("aria-controls", "nextOptionCollapse" + i);
+    card.querySelector(".collapse-control").href = "#nextOptionCollapse" + i;
+
     nextCol.append(document.createElement('br'));
     nextCol.append(card);
 }
