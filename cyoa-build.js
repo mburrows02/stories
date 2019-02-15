@@ -117,15 +117,31 @@ function saveEdge(event, edge) {
 }
 
 function deleteEdge(edge) {
-  var destNode = findNode(edge.to);
   data.edges.splice(data.edges.indexOf(edge), 1);
-  var edgesFrom = findEdgesFromNode(destNode.id).length;
-  var edgesTo = findEdgesToNode(destNode.id).length;
-  if (edgesFrom === 0 && edgesTo === 0) {
-    data.nodes.splice(data.nodes.indexOf(destNode), 1);
-  }
+  checkForFloaterNode(edge.to);
+  var currNodeDeleted = checkForFloaterNode(edge.from);
   saveToLocalStorage();
-  updateBuildPage();
+  if (currNodeDeleted) {
+    if (build.prev.length) {
+      goBack();
+    } else {
+      initBuildPage();
+      updateBuildPage();
+    }
+  } else {
+    updateBuildPage();
+  }
+}
+
+function checkForFloaterNode(nodeId) {
+  var edgesFrom = findEdgesFromNode(nodeId).length;
+  var edgesTo = findEdgesToNode(nodeId).length;
+  if (edgesFrom === 0 && edgesTo === 0) {
+    var node = findNode(nodeId);
+    data.nodes.splice(data.nodes.indexOf(node), 1);
+    return true;
+  }
+  return false;
 }
 
 function moveEdge(edge, up) {
