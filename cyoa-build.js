@@ -1,220 +1,103 @@
-var build = {
-  prev: []
-};
+storiesApp.controller('BuildController', 
+    ['$scope', 'story', function BuildController($scope, storyService) {
+  $scope.curr = {};
+  $scope.newOption = {
+    toNodeType:'new',
+    option: {
+      set: {},
+      requires: {}
+    },
+    newNode: {}
+  };
+  $scope.nodes = storyService.story.nodes;
+  $scope.edges = storyService.story.edges;
 
-function clearElement(elem) {
-  while (elem.hasChildNodes()) { 
-    elem.removeChild(elem.lastChild);
+  $scope.goToNode = function(nodeId) {
+    $scope.curr = storyService.findNode(nodeId);
+  };
+
+  $scope.isNextOption = function(edge) {
+    return edge.from === $scope.curr.id;
   }
-}
-
-function initBuildPage() {
-  build.prev = [];
-  build.curr = 0;
-}
-
-function goToNode(nodeId) {
-  if (build.curr !== undefined) {
-    build.prev.push({node: build.curr, edge: findEdge(build.curr, nodeId).label});
+  $scope.isPrevOption = function(edge) {
+    return edge.to === $scope.curr.id;
   }
-  build.curr = nodeId;
-  updateBuildPage();
-}
 
-function goBack() {
-  build.curr = build.prev.pop().node;
-  updateBuildPage();
-}
+  $scope.saveToLocalStorage = storyService.saveToLocalStorage;
+  $scope.findNode = storyService.findNode;
 
-function updateBuildPage() {
-  if (build.curr === undefined) {
-    initBuildPage();
+  $scope.deleteEdge = function(edge) {
+    storyService.story.edges.splice(storyService.story.edges.indexOf(edge), 1);
+    $scope.checkForFloaterNode(edge.to);
+    var currNodeDeleted = $scope.checkForFloaterNode(edge.from);
+    storyService.saveToLocalStorage();
+    if (currNodeDeleted) {
+      $scope.goToNode(0);
+    }
+  };
+
+  $scope.checkForFloaterNode = function(nodeId) {
+    var edgesFrom = storyService.findEdgesFromNode(nodeId).length;
+    var edgesTo = storyService.findEdgesToNode(nodeId).length;
+    if (edgesFrom === 0 && edgesTo === 0) {
+      var node = storyService.findNode(nodeId);
+      storyService.story.nodes.splice(storyService.story.nodes.indexOf(node), 1);
+      return true;
+    }
+    return false;
+  };
+
+  $scope.moveEdge = function(edge, up) {
+    var edgeIndex = storyService.story.edges.indexOf(edge);
+    var inc = up ? -1 : 1;
+    var moved = false;
+    for (var i = edgeIndex + inc; i >= 0 && i < storyService.story.edges.length; i += inc) {
+      if (storyService.story.edges[i].from === edge.from) {
+        storyService.story.edges.splice(storyService.story.edges.indexOf(edge), 1);
+        storyService.story.edges.splice(i, 0, edge);
+        moved = true;
+        break;
+      }
+    }
+    if (moved) {
+      storyService.saveToLocalStorage();
+    }
+  };
+
+  $scope.saveNewOption = function() {
+    var destNodeId = $scope.addOrFindNodeForNewOption();
+    $scope.addEdgeForNewOption(destNodeId);
+    storyService.saveToLocalStorage();
+    $('#addEdgeModal').modal('hide');
   }
-  if (build.prev.length) {
-    var prev = build.prev[build.prev.length - 1];
-    var prevNode = findNode(prev.node);
-    document.getElementById('prevCard').removeAttribute('hidden');
-    document.getElementById('prevOption').innerText = prev.edge;
-    document.getElementById('prevLabel').innerText = prevNode.label;
-  } else {
-    document.getElementById('prevCard').setAttribute('hidden', '');
-  }
-  var currNode = findNode(build.curr);
-  document.getElementById('currLabel').value = currNode.label;
-  var nextCardTemplate = document.getElementById('nextCardTemplate');
-  var nextCol = document.getElementById('nextCol');
-  clearElement(nextCol);
-  var nextOptions = findEdgesFromNode(build.curr);
-  nextOptions.forEach(addOptionCard);
-  if (nextOptions.length > 0) {
-    var upButtons = nextCol.querySelectorAll("[name='moveUpButton']");
-    upButtons.item(0).setAttribute("hidden", "");
-    var downButtons = nextCol.querySelectorAll("[name='moveDownButton']");
-    downButtons.item(downButtons.length - 1).setAttribute("hidden", "");
-  }
-  var select = document.getElementById('existingNodeSelector');
-  clearElement(select);
-  data.nodes.forEach(function(node) {
-    var opt = document.createElement('option');
-    opt.innerText = node.label;
-    opt.value = node.id;
-    select.append(opt);
-  });
-}
 
-function addOptionCard(edge, i) {
-    var otherNode = findNode(edge.to);
-    var card = nextCardTemplate.cloneNode(true);
-    card.removeAttribute('id');
-    card.removeAttribute('hidden');
-
-    card.querySelectorAll('input').forEach(function(input) {
-      input.onblur = e => saveEdge(e, edge);
-    });
-    card.querySelectorAll('select').forEach(function(input) {
-      input.onchange = e => saveEdge(e, edge);
-    });
-    card.querySelector("[name='edgeLabel'").value = edge.label;
-    card.querySelector("[name='edgeSetFlag'").value = edge.set ? edge.set.name : '';
-    card.querySelector("[name='edgeSetFlagValue'").value = edge.set ? '' + edge.set.value : null;
-    card.querySelector("[name='edgeRequiresFlag'").value = edge.requires ? edge.requires.name : '';
-    card.querySelector("[name='edgeRequiresFlagValue'").value = edge.requires ? '' + edge.requires.value : null;
-
-    card.querySelector("[name='nextLabel']").innerText = otherNode.label;
-    card.querySelector("[name='selectNext']").onclick = () => goToNode(otherNode.id);
-    card.querySelector("[name='moveUpButton'").onclick = () => moveEdge(edge, true);
-    card.querySelector("[name='moveDownButton'").onclick = () => moveEdge(edge, false);
-    card.querySelector("[name='deleteButton'").onclick = () => deleteEdge(edge);
-
-    card.querySelector(".collapse").id = "nextOptionCollapse" + i;
-    card.querySelector(".collapse").setAttribute("aria-controls", "nextOptionCollapse" + i);
-    card.querySelector(".collapse-control").href = "#nextOptionCollapse" + i;
-
-    nextCol.append(document.createElement('br'));
-    nextCol.append(card);
-}
-
-/** EDIT FUNCTIONS **/
-
-function saveCurrentLabel() {
-  var labelText = document.getElementById('currLabel').value;
-  var currNode = findNode(build.curr);
-  currNode.label = labelText;
-  saveToLocalStorage();
-  updateBuildPage();
-}
-
-function saveEdge(event, edge) {
-  var parent = event.target.closest('.card');
-  edge.label = parent.querySelector("[name='edgeLabel']").value;
-  var setName = parent.querySelector("[name='edgeSetFlag'").value;
-  var setValue = parent.querySelector("[name='edgeSetFlagValue'").value === 'true';
-  edge.set = setName ? { name: setName, value: setValue } : null;
-  var requiresName = parent.querySelector("[name='edgeRequiresFlag'").value;
-  var requiresValue = parent.querySelector("[name='edgeRequiresFlagValue'").value === 'true';
-  edge.requires = requiresName ? { name: requiresName, value: requiresValue } : null;
-  saveToLocalStorage();
-}
-
-function deleteEdge(edge) {
-  data.edges.splice(data.edges.indexOf(edge), 1);
-  checkForFloaterNode(edge.to);
-  var currNodeDeleted = checkForFloaterNode(edge.from);
-  saveToLocalStorage();
-  if (currNodeDeleted) {
-    if (build.prev.length) {
-      goBack();
+  $scope.addOrFindNodeForNewOption = function() {
+    var destNodeId;
+    if ($scope.newOption.toNodeType === 'new') {
+      destNodeId = storyService.getNextId();
+      var newNode = {
+        id: destNodeId,
+        label: $scope.newOption.newNode.label
+      };
+      storyService.story.nodes.push(newNode);
     } else {
-      initBuildPage();
-      updateBuildPage();
+      destNodeId = parseInt($scope.newOption.toNodeId);
     }
-  } else {
-    updateBuildPage();
+    return destNodeId;
   }
-}
 
-function checkForFloaterNode(nodeId) {
-  var edgesFrom = findEdgesFromNode(nodeId).length;
-  var edgesTo = findEdgesToNode(nodeId).length;
-  if (edgesFrom === 0 && edgesTo === 0) {
-    var node = findNode(nodeId);
-    data.nodes.splice(data.nodes.indexOf(node), 1);
-    return true;
+  $scope.addEdgeForNewOption = function(destNodeId) {
+    var newEdgeId = storyService.getNextEdgeId();
+    var newEdge = Object.assign({id: newEdgeId, to: destNodeId, from: $scope.curr.id}, 
+      $scope.newOption.option);
+    storyService.story.edges.push(newEdge);
   }
-  return false;
-}
 
-function moveEdge(edge, up) {
-  var edgeIndex = data.edges.indexOf(edge);
-  var inc = up ? -1 : 1;
-  var moved = false;
-  for (var i = edgeIndex + inc; i >= 0 && i < data.edges.length; i += inc) {
-    if (data.edges[i].from === edge.from) {
-      data.edges.splice(data.edges.indexOf(edge), 1);
-      data.edges.splice(i, 0, edge);
-      moved = true;
-      break;
-    }
+  $scope.init = function() {
+    var target = new URL(window.location.href).hash;
+    $scope.goToNode(target ? parseInt(target.substring(1)) : 0);
   }
-  if (moved) {
-    saveToLocalStorage();
-    updateBuildPage();
-  }
-}
 
-/** ADD FUNCTIONS **/
+  $scope.init();
 
-function selectNewTarget() {
-  document.getElementById('existingNodeSelector').setAttribute('hidden', '');
-  document.getElementById('newNodeLabel').removeAttribute('hidden');
-}
-
-function selectExistingTarget() {
-  document.getElementById('newNodeLabel').setAttribute('hidden', '');
-  document.getElementById('existingNodeSelector').removeAttribute('hidden');
-}
-
-function saveNewOption() {
-  var destNodeId = addOrFindNodeForNewOption();
-  addEdgeForNewOption(destNodeId);
-  saveToLocalStorage();
-  [].forEach.call(document.getElementsByClassName('new-option-field'), e => e.value = '');
-  $('#addEdgeModal').modal('hide');
-  updateBuildPage();
-}
-
-function addOrFindNodeForNewOption() {
-  var destNodeType = document.querySelector('[name="toNodeType"]:checked').value;
-  var destNodeId;
-  if (destNodeType === 'new') {
-    destNodeId = getNextId();
-    var newNode = {
-      id: destNodeId,
-      label: document.getElementById('newNodeLabel').value
-    };
-    data.nodes.push(newNode);
-  } else {
-    destNodeId = parseInt(document.getElementById('existingNodeSelector').value);
-  }
-  return destNodeId;
-}
-
-function addEdgeForNewOption(destNodeId) {
-  var newEdgeLabel = document.getElementById('newOptionText').value;
-  var newEdge = {
-    to: destNodeId,
-    from: build.curr,
-    label: newEdgeLabel
-  }
-  var setFlag = document.getElementById('newOptionFlag').value;
-  if (setFlag) {
-    var setFlagValue = document.getElementById('newOptionFlagValue').value;
-    newEdge.set = { name: setFlag, value: setFlagValue==='true' };
-  }
-  var requiresFlag = document.getElementById('newOptionRequires').value;
-  if (requiresFlag) {
-    var requiresFlagValue = document.getElementById('newOptionRequiresValue').value;
-    newEdge.requires = { name: requiresFlag, value: requiresFlagValue==='true' };
-  }
-  data.edges.push(newEdge);
-}
+}]);

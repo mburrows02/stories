@@ -1,0 +1,196 @@
+<!doctype html>
+<html ng-app="storiesApp">
+<head>
+  <title>A Story</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <link href="cyoa.css" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body ng-controller="BuildController">
+  <div class="container-fluid">
+    <!-- Navbar -->
+    <ul class="nav nav-tabs" id="storyTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" href="file.html">File</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="visualize.html">Visualize</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="build.html">Build</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">Play</a>
+      </li>
+    </ul>
+
+    <div class="row">
+      <div class="col-12 col-md-4"><div ng-repeat="edge in edges | filter:isPrevOption track by edge.id">
+        <br>
+        <div class="card" ng-init="fromNodeLabel = findNode(edge.from).label">
+          <div class="card-header">
+            <span class="card-title"></span>
+            <button class="btn btn-primary float-right" ng-click="goToNode(edge.from)">Back</button>
+          </div>
+          <div class="card-body">
+            <p>{{fromNodeLabel}}</p> 
+          </div>
+        </div>
+      </div></div>
+      <div class="col-12 col-md-4">
+        <br>
+        <div class="card">
+          <div class="card-body" id="currCard">
+            <div class="form-group">
+              <textarea class="form-control" id="currLabel" ng-blur="saveToLocalStorage()" rows="6" ng-model="curr.label"></textarea>
+            </div>
+            <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4" id="nextCol"><div ng-repeat="edge in edges | filter:isNextOption track by edge.id">
+        <br>
+        <div class="card" ng-init="toNodeLabel = findNode(edge.to).label">
+          <div class="card-header">
+            <div class="form-row justify-content-between">
+              <div class="col">
+                <input type="text" class="form-control" name="edgeLabel" ng-model="edge.label" ng-blur="saveToLocalStorage()">
+              </div>
+              <div class="col-auto">
+                <div class="btn-group float-right">
+                  <button type="button" class="btn btn-primary" ng-click="goToNode(edge.to)">Select</button>
+                  <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" name="moveUpButton" href="#" ng-click="moveEdge(edge, true)">Move Up</a>
+                    <a class="dropdown-item" name="moveDownButton" href="#" ng-click="moveEdge(edge, false)">Move Down</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" name="deleteButton" href="#" ng-click="deleteEdge(edge)">Delete</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <p name="nextLabel">{{toNodeLabel}}</p>
+          </div>
+          <div class="card-footer">
+            <a class="collapse-control" data-toggle="collapse" href="#nextEdgeAdvanced{{$index}}" role="button" aria-expanded="false" aria-controls="nextEdgeAdvanced{{$index}}">
+              Advanced options
+            </a>
+            <div class="collapse" id="nextEdgeAdvanced{{$index}}">
+              <label for="edgeSetFlag">Set Flag</label>
+              <div class="form-row">
+                <div class="col">
+                  <input type="text" class="form-control" name="edgeSetFlag" ng-model="edge.set.name" ng-blur="saveToLocalStorage()" />
+                </div>
+                <div class="col-auto">
+                  <select class="custom-select" name="edgeSetFlagValue" ng-model="edge.set.value" ng-change="saveToLocalStorage()">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+              </div>
+              <label for="edgeRequiresFlag">Requires Flag</label>
+              <div class="form-row">
+                <div class="col">
+                  <input type="text" class="form-control" name="edgeRequiresFlag" ng-model="edge.requires.name" ng-blur="saveToLocalStorage()"/>
+                </div>
+                <div class="col-auto">
+                  <select class="custom-select" name="edgeRequiresFlagValue" ng-model="edge.requires.value" ng-change="saveToLocalStorage()">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  
+  <div class="modal fade" id="addEdgeModal" tabindex="-1" role="dialog" aria-labelledby="addEdgeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Option</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newOptionText">Option Text</label>
+            <input type="text" ng-model="newOption.option.label" class="new-option-field form-control">
+          </div>
+          <div class="form-group">
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" ng-model="newOption.toNodeType" name="toNodeType" id="toNewNode" value="new">
+              <label class="custom-control-label" for="toNewNode">
+                New
+              </label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" ng-model="newOption.toNodeType" name="toNodeType" id="toExistingNode" value="existing">
+              <label class="custom-control-label" for="toExistingNode">
+                Existing
+              </label>
+            </div>
+            <textarea class="form-control new-option-field" ng-model="newOption.newNode.label" ng-show="newOption.toNodeType==='new'"></textarea>
+            <select class="custom-select" ng-model="newOption.toNodeId" ng-show="newOption.toNodeType==='existing'">
+              <option ng-repeat="node in nodes track by node.id" ng-value="node.id">{{node.label}}</option>
+            </select>
+          </div>
+          <a data-toggle="collapse" href="#newEdgeAdvanced" role="button" aria-expanded="false" aria-controls="newEdgeAdvanced">
+            Advanced options
+          </a>
+          <div class="collapse" id="newEdgeAdvanced">
+            <label for="newOptionFlag">Set Flag</label>
+            <div class="form-row">
+              <div class="col">
+                <input type="text" class="new-option-field form-control" ng-model="newOption.option.set.name">
+              </div>
+              <div class="col-auto">
+                <select class="custom-select" ng-model="newOption.option.set.value">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+            </div>
+            <label for="newOptionRequires">Requires Flag</label>
+            <div class="form-row">
+              <div class="col">
+                <input type="text" class="new-option-field form-control" ng-model="newOption.option.requires.name">
+              </div>
+              <div class="col-auto">
+                <select class="custom-select" ng-model="newOption.option.requires.value">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" ng-click="saveNewOption()"class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.7/angular.min.js"></script>
+  <script src="app.js"></script>
+  <script src="cyoa-build.js"></script>
+</body>
+</html>

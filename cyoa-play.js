@@ -1,46 +1,34 @@
-var flags = [];
-function play() {
-  flags = [];
-  renderNode(0);
-}
-function renderNode(nodeId) {
-  var optionsContainer = document.getElementById('options');
-  while (optionsContainer.hasChildNodes()) { 
-    optionsContainer.removeChild(optionsContainer.lastChild);
-  }
-  var node = findNode(nodeId);
-  document.getElementById('text').innerText = node.label;
-  renderEdges(node);
-  if (optionsContainer.children.length === 0) {
-      var btn = document.createElement('button');
-      btn.onclick = play;
-      btn.innerText = 'Restart';
-      btn.setAttribute('class', 'btn btn-primary');
-      optionsContainer.append(btn);
-  }
-}
+storiesApp.controller('PlayController', 
+    ['$scope', 'story', function PlayController($scope, storyService) {
+  $scope.flags = [];
+  $scope.node = {};
+  $scope.options = [];
 
-function renderEdges(node) {
-  var optionsContainer = document.getElementById('options');
-  var edgesFromNode = findEdgesFromNode(node.id);
-  edgesFromNode.forEach(function(edge) {
-    if (!edge.requires || edge.requires.value === flags.includes(edge.requires.name)) {
-      var p = document.createElement('p');
-      var btn = document.createElement('button');
-      btn.onclick = function() {
-        if (edge.set) {
-          if (edge.set.value) {
-            flags.push(edge.set.name);
-          } else {
-            flags.splice(flags.indexOf(edge.set.name), 1);
-          }
-        }
-        renderNode(edge.to);
+  $scope.play = function() {
+    $scope.flags = [];
+    $scope.renderNode(0);
+  };
+
+  $scope.renderNode = function(nodeId) {
+    $scope.node = storyService.findNode(nodeId);
+    $scope.options = storyService.findEdgesFromNode(nodeId);
+  };
+
+  $scope.filterOptions = function(opt) {
+    return !opt.requires || 
+        (opt.requires.value == 'true') === $scope.flags.includes(opt.requires.name);
+  };
+
+  $scope.selectEdge = function(edge) {
+    if (edge.set) {
+      if (edge.set.value == 'true') {
+        $scope.flags.push(edge.set.name);
+      } else {
+        $scope.flags.splice($scope.flags.indexOf(edge.set.name), 1);
       }
-      btn.innerText = edge.label;
-      btn.setAttribute('class', 'btn btn-primary btn-block');
-      p.append(btn);
-      optionsContainer.append(p);
     }
-  });
-}
+    $scope.renderNode(edge.to);
+  };
+
+  $scope.play();
+}]);

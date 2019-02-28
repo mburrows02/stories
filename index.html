@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html ng-app="storiesApp">
 <head>
   <title>A Story</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
@@ -10,242 +10,40 @@
 </head>
 
 <body>
-  <div class="container-fluid">
+  <div class="container-fluid" ng-controller="PlayController">
     <!-- Navbar -->
     <ul class="nav nav-tabs" id="storyTab" role="tablist">
       <li class="nav-item">
-        <a class="nav-link" id="file-tab" data-toggle="tab" href="#file" role="tab" aria-controls="file" aria-selected="false">File</a>
+        <a class="nav-link" href="file.html">File</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="visualize-tab" data-toggle="tab" href="#visualize" role="tab" aria-controls="visualize" aria-selected="false">Visualize</a>
+        <a class="nav-link" href="visualize.html">Visualize</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="build-tab" data-toggle="tab" href="#build" role="tab" aria-controls="build" aria-selected="false">Build</a>
+        <a class="nav-link" href="build.html">Build</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="play-tab" data-toggle="tab" href="#play" role="tab" aria-controls="play" aria-selected="false">Play</a>
+        <a class="nav-link active" href="index.html">Play</a>
       </li>
     </ul>
 
-    <div class="tab-content" id="storyTabContent">
-      <!-- File tab -->
-      <div class="tab-pane fade" id="file" role="tabpanel" aria-labelledby="file-tab">
-        <div class="row justify-content-center">
-          <div class="col-md-6 col-12">
-            <br>
-            <div class="card">
-              <div class="card-body">
-                <p class="text-center">Upload a file to resume a story, or save your current story for later.</p>
-                <div class="row pb-3">
-                  <div class="col">
-                    <div class="custom-file">
-                      <input type="file" class="custom-file-input" id="fileInput">
-                      <label class="custom-file-label" for="fileInput">Choose file</label>
-                    </div>
-                  </div>
-                  <div class="col">
-                    <form id="uploadForm">
-                      <button class="btn btn-primary file-button float-right" onclick="upload()" id="uploadButton">Upload</button>
-                    </form>
-                  </div>
-                </div>
-                <div class="row pb-3">
-                  <div class="col">
-                    <input id="storyName" type="text" class="form-control" value="My Story">
-                  </div>
-                  <div class="col">
-                    <button class="btn btn-primary file-button float-right" onclick="download()" id="downloadButton">Download</button>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <button class="btn btn-primary file-button float-right" onclick="reset()" id="resetButton">Reset</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-8 col-md-4 text-center ">
+        <br>
+        <div class="card">
+          <div class="card-body">
+            <p class="pb-2" id="text">{{node.label}}</p>
+            <p ng-repeat="opt in options | filter:filterOptions">
+              <button ng-click="selectEdge(opt)" class="btn btn-primary btn-block">
+                {{opt.label}}
+              </button>
+            </p>
+            <p ng-if="options.length === 0">
+              <button ng-click="play()" class="btn btn-primary btn-block">
+                Restart
+              </button>
+            </p>
           </div>
-        </div>
-      </div>
-
-      <!-- Visualize tab -->
-      <div class="tab-pane fade" id="visualize" role="tabpanel" aria-labelledby="visualize-tab">
-        <div class="row">
-          <div class="col">
-            <div id="map" class="map-container"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Build tab -->
-      <div class="tab-pane fade" id="build" role="tabpanel" aria-labelledby="build-tab">
-        <div class="row">
-          <div class="col-12 col-md-4">
-            <br>
-            <div class="card" id="prevCard" hidden>
-              <div class="card-header">
-                <span id="prevOption" class="card-title"></span>
-                <button class="btn btn-primary float-right" onclick="goBack()">Back</button>
-              </div>
-              <div class="card-body">
-                <p id="prevLabel"></p> 
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <br>
-            <div class="card">
-              <div class="card-body" id="currCard">
-                <div class="form-group">
-                  <textarea class="form-control" id="currLabel" onblur="saveCurrentLabel()" rows="6"></textarea>
-                </div>
-                <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
-              </div>
-            </div>
-          </div>
-          <div class="card" id="nextCardTemplate" hidden>
-            <div class="card-header">
-              <div class="form-row justify-content-between">
-                <div class="col">
-                  <input type="text" class="form-control" name="edgeLabel">
-                </div>
-                <div class="col-auto">
-                  <div class="btn-group float-right">
-                    <button type="button" class="btn btn-primary" name="selectNext">Select</button>
-                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                      <a class="dropdown-item" name="moveUpButton" href="#">Move Up</a>
-                      <a class="dropdown-item" name="moveDownButton" href="#">Move Down</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" name="deleteButton" href="#">Delete</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <p name="nextLabel"></p>
-            </div>
-            <div class="card-footer">
-              <a class="collapse-control" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="newEdgeAdvanced">
-                Advanced options
-              </a>
-              <div class="collapse">
-                <label for="edgeSetFlag">Set Flag</label>
-                <div class="form-row">
-                  <div class="col">
-                    <input type="text" class="form-control" name="edgeSetFlag" />
-                  </div>
-                  <div class="col-auto">
-                    <select class="custom-select" name="edgeSetFlagValue">
-                      <option value="true">true</option>
-                      <option value="false">false</option>
-                    </select>
-                  </div>
-                </div>
-                <label for="edgeRequiresFlag">Requires Flag</label>
-                <div class="form-row">
-                  <div class="col">
-                    <input type="text" class="form-control" name="edgeRequiresFlag" />
-                  </div>
-                  <div class="col-auto">
-                    <select class="custom-select" name="edgeRequiresFlagValue">
-                      <option value="true">true</option>
-                      <option value="false">false</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4" id="nextCol">
-            <br>
-          </div>
-        </div>
-      </div>
-
-      <!-- Play tab -->
-      <div class="tab-pane fade" id="play" role="tabpanel" aria-labelledby="play-tab">
-        <div class="row justify-content-center">
-          <div class="col-12 col-sm-8 col-md-4 text-center ">
-            <br>
-            <div class="card">
-              <div class="card-body">
-                <p class="pb-2" id="text"></p>
-                <span id="options"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="addEdgeModal" tabindex="-1" role="dialog" aria-labelledby="addEdgeModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addEdgeModalLabel">Add Option</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="newOptionText">Option Text</label>
-            <input type="text" id="newOptionText" class="new-option-field form-control">
-          </div>
-          <div class="form-group">
-            <div class="custom-control custom-radio">
-              <input class="custom-control-input" type="radio" name="toNodeType" id="toNewNode" value="new" checked onchange="selectNewTarget()">
-              <label class="custom-control-label" for="toNewNode">
-                New
-              </label>
-            </div>
-            <div class="custom-control custom-radio">
-              <input class="custom-control-input" type="radio" name="toNodeType" id="toExistingNode" value="existing" onchange="selectExistingTarget()">
-              <label class="custom-control-label" for="toExistingNode">
-                Existing
-              </label>
-            </div>
-            <textarea class="form-control new-option-field" id="newNodeLabel"></textarea>
-            <select class="custom-select" id="existingNodeSelector" hidden></select>
-          </div>
-          <a data-toggle="collapse" href="#newEdgeAdvanced" role="button" aria-expanded="false" aria-controls="newEdgeAdvanced">
-            Advanced options
-          </a>
-          <div class="collapse" id="newEdgeAdvanced">
-            <label for="newOptionFlag">Set Flag</label>
-            <div class="form-row">
-              <div class="col">
-                <input type="text" id="newOptionFlag" class="new-option-field form-control">
-              </div>
-              <div class="col-auto">
-                <select class="custom-select" id="newOptionFlagValue">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select>
-              </div>
-            </div>
-            <label for="newOptionRequires">Requires Flag</label>
-            <div class="form-row">
-              <div class="col">
-                <input type="text" id="newOptionRequires" class="new-option-field form-control">
-              </div>
-              <div class="col-auto">
-                <select class="custom-select" id="newOptionRequiresValue">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" onclick="saveNewOption()"class="btn btn-primary">Add</button>
         </div>
       </div>
     </div>
@@ -256,10 +54,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
-  <script src="cyoa-data.js"></script>
-  <script src="cyoa-visualize.js"></script>
-  <script src="cyoa-build.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.7/angular.min.js"></script>
+  <script src="app.js"></script>
   <script src="cyoa-play.js"></script>
-  <script src="cyoa.js"></script>
 </body>
 </html>
