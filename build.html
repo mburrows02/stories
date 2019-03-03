@@ -28,15 +28,16 @@
     </ul>
 
     <div class="row">
-      <div class="col-12 col-md-4"><div ng-repeat="edge in edges | filter:isPrevOption track by edge.id">
+      <div class="col-12 col-md-4"><div ng-cloak ng-repeat="edge in edges | filter:isPrevOption track by edge.id">
         <br>
-        <div class="card" ng-init="fromNodeLabel = findNode(edge.from).label">
+        <div class="card" ng-init="fromNode=findNode(edge.from)">
           <div class="card-header">
-            <span class="card-title"></span>
+            <span class="card-title">{{edge.label}}</span>
             <button class="btn btn-primary float-right" ng-click="goToNode(edge.from)">Back</button>
           </div>
           <div class="card-body">
-            <p>{{fromNodeLabel}}</p> 
+            <p class="lead">{{fromNode.label}}</p>
+            <p>{{fromNode.text}}</p>
           </div>
         </div>
       </div></div>
@@ -45,15 +46,20 @@
         <div class="card">
           <div class="card-body" id="currCard">
             <div class="form-group">
-              <textarea class="form-control" id="currLabel" ng-blur="saveToLocalStorage()" rows="6" ng-model="curr.label"></textarea>
+              <label>Name</label>
+              <input type="text" class="form-control" ng-blur="saveToLocalStorage()" ng-model="curr.label"></input>
+            </div>
+            <div class="form-group">
+              <label>Text</label>
+              <textarea class="form-control" ng-blur="saveToLocalStorage()" rows="6" ng-model="curr.text"></textarea>
             </div>
             <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
           </div>
         </div>
       </div>
-      <div class="col-12 col-md-4" id="nextCol"><div ng-repeat="edge in edges | filter:isNextOption track by edge.id">
+      <div class="col-12 col-md-4" id="nextCol"><div ng-cloak ng-repeat="edge in edges | filter:isNextOption track by edge.id">
         <br>
-        <div class="card" ng-init="toNodeLabel = findNode(edge.to).label">
+        <div class="card" ng-init="toNode=findNode(edge.to)">
           <div class="card-header">
             <div class="form-row justify-content-between">
               <div class="col">
@@ -76,35 +82,45 @@
             </div>
           </div>
           <div class="card-body">
-            <p name="nextLabel">{{toNodeLabel}}</p>
+            <p class="lead">{{toNode.label}}</p>
+            <p>{{toNode.text}}</p>
           </div>
           <div class="card-footer">
             <a class="collapse-control" data-toggle="collapse" href="#nextEdgeAdvanced{{$index}}" role="button" aria-expanded="false" aria-controls="nextEdgeAdvanced{{$index}}">
               Advanced options
             </a>
             <div class="collapse" id="nextEdgeAdvanced{{$index}}">
-              <label for="edgeSetFlag">Set Flag</label>
-              <div class="form-row">
+              <label for="edgeSetFlag">Set Flags</label>
+              <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="edge.set.push({})">+</button>
+              <div class="form-row" ng-repeat="flag in edge.set track by $index">
                 <div class="col">
-                  <input type="text" class="form-control" name="edgeSetFlag" ng-model="edge.set.name" ng-blur="saveToLocalStorage()" />
+                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()" />
                 </div>
                 <div class="col-auto">
-                  <select class="custom-select" name="edgeSetFlagValue" ng-model="edge.set.value" ng-change="saveToLocalStorage()">
+                  <select class="custom-select" ng-model="flag.value" ng-change="saveToLocalStorage()">
                     <option value="true">true</option>
                     <option value="false">false</option>
                   </select>
+                </div>
+                <div class="col-auto" ng-show="edge.set.length > 1">
+                  <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="edge.set.splice($index, 1)">X</button>
                 </div>
               </div>
-              <label for="edgeRequiresFlag">Requires Flag</label>
-              <div class="form-row">
+              <br/>
+              <label for="edgeRequiresFlag">Requires Flags</label>
+              <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="edge.requires.push({})">+</button>
+              <div class="form-row" ng-repeat="flag in edge.requires track by $index">
                 <div class="col">
-                  <input type="text" class="form-control" name="edgeRequiresFlag" ng-model="edge.requires.name" ng-blur="saveToLocalStorage()"/>
+                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()"/>
                 </div>
                 <div class="col-auto">
-                  <select class="custom-select" name="edgeRequiresFlagValue" ng-model="edge.requires.value" ng-change="saveToLocalStorage()">
+                  <select class="custom-select" ng-model="flag.value" ng-change="saveToLocalStorage()">
                     <option value="true">true</option>
                     <option value="false">false</option>
                   </select>
+                </div>
+                <div class="col-auto" ng-show="edge.requires.length > 1">
+                  <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="edge.requires.splice($index, 1)">X</button>
                 </div>
               </div>
             </div>
@@ -141,8 +157,17 @@
                 Existing
               </label>
             </div>
-            <textarea class="form-control new-option-field" ng-model="newOption.newNode.label" ng-show="newOption.toNodeType==='new'"></textarea>
-            <select class="custom-select" ng-model="newOption.toNodeId" ng-show="newOption.toNodeType==='existing'">
+          </div>
+          <div class="form-group" ng-show="newOption.toNodeType==='new'">
+            <label>Name</label>
+            <input type="text" class="form-control" ng-model="newOption.newNode.label">
+          </div>
+          <div class="form-group" ng-show="newOption.toNodeType==='new'">
+            <label>Text</label>
+            <textarea class="form-control" ng-model="newOption.newNode.text"></textarea>
+          </div>
+          <div class="form-group" ng-show="newOption.toNodeType==='existing'">
+            <select class="custom-select" ng-model="newOption.toNodeId">
               <option ng-repeat="node in nodes track by node.id" ng-value="node.id">{{node.label}}</option>
             </select>
           </div>
@@ -150,28 +175,43 @@
             Advanced options
           </a>
           <div class="collapse" id="newEdgeAdvanced">
-            <label for="newOptionFlag">Set Flag</label>
-            <div class="form-row">
+            <label for="newOptionFlag">Set Flags</label>
+            <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="newOption.option.set.push({})">+</button>
+            <div class="form-row" ng-repeat="flag in newOption.option.set track by $index">
               <div class="col">
-                <input type="text" class="new-option-field form-control" ng-model="newOption.option.set.name">
+                <input type="text" class="new-option-field form-control" ng-model="flag.name">
               </div>
               <div class="col-auto">
-                <select class="custom-select" ng-model="newOption.option.set.value">
+                <select class="custom-select" ng-model="flag.value">
                   <option value="true">true</option>
                   <option value="false">false</option>
                 </select>
+              </div>
+              <div class="col-auto" ng-show="newOption.option.set.length > 1">
+                <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="newOption.option.set.splice($index, 1)">X</button>
               </div>
             </div>
-            <label for="newOptionRequires">Requires Flag</label>
+            <br/>
             <div class="form-row">
               <div class="col">
-                <input type="text" class="new-option-field form-control" ng-model="newOption.option.requires.name">
+                <label for="newOptionRequires">Requires Flags</label>
               </div>
               <div class="col-auto">
-                <select class="custom-select" ng-model="newOption.option.requires.value">
+                <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle" ng-click="newOption.option.requires.push({})">+</button>
+              </div>
+            </div>
+            <div class="form-row" ng-repeat="flag in newOption.option.requires track by $index">
+              <div class="col">
+                <input type="text" class="new-option-field form-control" ng-model="flag.name">
+              </div>
+              <div class="col-auto">
+                <select class="custom-select" ng-model="flag.value">
                   <option value="true">true</option>
                   <option value="false">false</option>
                 </select>
+              </div>
+              <div class="col-auto" ng-show="newOption.option.requires.length > 1">
+                <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="newOption.option.requires.splice($index, 1)">X</button>
               </div>
             </div>
           </div>

@@ -13,3 +13,11 @@
 .file-button {
 	width: 100px;
 }
+
+.btn-reg {
+	padding: 0px 6px;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}

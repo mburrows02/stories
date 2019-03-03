@@ -15,16 +15,27 @@ storiesApp.controller('PlayController',
   };
 
   $scope.filterOptions = function(opt) {
-    return !opt.requires || 
-        (opt.requires.value == 'true') === $scope.flags.includes(opt.requires.name);
+    if (opt.requires) {
+      for (flag of opt.requires) {
+        if (flag && flag.name && 
+            (flag.value == 'true') !== $scope.flags.includes(flag.name)) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   $scope.selectEdge = function(edge) {
     if (edge.set) {
-      if (edge.set.value == 'true') {
-        $scope.flags.push(edge.set.name);
-      } else {
-        $scope.flags.splice($scope.flags.indexOf(edge.set.name), 1);
+      for (flag of edge.set) {
+        if (flag && flag.name) {
+          if (flag.value == 'true') {
+            $scope.flags.push(flag.name);
+          } else {
+            $scope.flags.splice($scope.flags.indexOf(flag.name), 1);
+          }
+        }
       }
     }
     $scope.renderNode(edge.to);

@@ -1,14 +1,6 @@
 storiesApp.controller('BuildController', 
     ['$scope', 'story', function BuildController($scope, storyService) {
   $scope.curr = {};
-  $scope.newOption = {
-    toNodeType:'new',
-    option: {
-      set: {},
-      requires: {}
-    },
-    newNode: {}
-  };
   $scope.nodes = storyService.story.nodes;
   $scope.edges = storyService.story.edges;
 
@@ -18,10 +10,11 @@ storiesApp.controller('BuildController',
 
   $scope.isNextOption = function(edge) {
     return edge.from === $scope.curr.id;
-  }
+  };
+
   $scope.isPrevOption = function(edge) {
     return edge.to === $scope.curr.id;
-  }
+  };
 
   $scope.saveToLocalStorage = storyService.saveToLocalStorage;
   $scope.findNode = storyService.findNode;
@@ -67,9 +60,10 @@ storiesApp.controller('BuildController',
   $scope.saveNewOption = function() {
     var destNodeId = $scope.addOrFindNodeForNewOption();
     $scope.addEdgeForNewOption(destNodeId);
+    $scope.resetNewOption();
     storyService.saveToLocalStorage();
     $('#addEdgeModal').modal('hide');
-  }
+  };
 
   $scope.addOrFindNodeForNewOption = function() {
     var destNodeId;
@@ -84,19 +78,31 @@ storiesApp.controller('BuildController',
       destNodeId = parseInt($scope.newOption.toNodeId);
     }
     return destNodeId;
-  }
+  };
 
   $scope.addEdgeForNewOption = function(destNodeId) {
     var newEdgeId = storyService.getNextEdgeId();
     var newEdge = Object.assign({id: newEdgeId, to: destNodeId, from: $scope.curr.id}, 
       $scope.newOption.option);
     storyService.story.edges.push(newEdge);
-  }
+  };
 
   $scope.init = function() {
     var target = new URL(window.location.href).hash;
     $scope.goToNode(target ? parseInt(target.substring(1)) : 0);
-  }
+    $scope.resetNewOption();
+  };
+
+  $scope.resetNewOption = function() {
+    $scope.newOption = {
+      toNodeType:'new',
+      option: {
+        set: [{}],
+        requires: [{}]
+      },
+      newNode: {}
+    };
+  };
 
   $scope.init();
 

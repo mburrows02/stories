@@ -30,9 +30,9 @@
     <div class="row justify-content-center">
       <div class="col-12 col-sm-8 col-md-4 text-center ">
         <br>
-        <div class="card">
+        <div ng-cloak class="card">
           <div class="card-body">
-            <p class="pb-2" id="text">{{node.label}}</p>
+            <p class="pb-2" id="text">{{node.text ? node.text : node.label}}</p>
             <p ng-repeat="opt in options | filter:filterOptions">
               <button ng-click="selectEdge(opt)" class="btn btn-primary btn-block">
                 {{opt.label}}
