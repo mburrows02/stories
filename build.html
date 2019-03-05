@@ -94,7 +94,7 @@
               <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="edge.set.push({})">+</button>
               <div class="form-row" ng-repeat="flag in edge.set track by $index">
                 <div class="col">
-                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()" />
+                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()" list="flagNames" />
                 </div>
                 <div class="col-auto">
                   <select class="custom-select" ng-model="flag.value" ng-change="saveToLocalStorage()">
@@ -111,7 +111,7 @@
               <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="edge.requires.push({})">+</button>
               <div class="form-row" ng-repeat="flag in edge.requires track by $index">
                 <div class="col">
-                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()"/>
+                  <input type="text" class="form-control" ng-model="flag.name" ng-blur="saveToLocalStorage()" list="flagNames"/>
                 </div>
                 <div class="col-auto">
                   <select class="custom-select" ng-model="flag.value" ng-change="saveToLocalStorage()">
@@ -179,7 +179,7 @@
             <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="newOption.option.set.push({})">+</button>
             <div class="form-row" ng-repeat="flag in newOption.option.set track by $index">
               <div class="col">
-                <input type="text" class="new-option-field form-control" ng-model="flag.name">
+                <input type="text" class="new-option-field form-control" ng-model="flag.name" list="flagNames">
               </div>
               <div class="col-auto">
                 <select class="custom-select" ng-model="flag.value">
@@ -202,7 +202,7 @@
             </div>
             <div class="form-row" ng-repeat="flag in newOption.option.requires track by $index">
               <div class="col">
-                <input type="text" class="new-option-field form-control" ng-model="flag.name">
+                <input type="text" class="new-option-field form-control" ng-model="flag.name" list="flagNames">
               </div>
               <div class="col-auto">
                 <select class="custom-select" ng-model="flag.value">
@@ -223,6 +223,10 @@
       </div>
     </div>
   </div>
+
+  <datalist id="flagNames">
+    <option ng-repeat="flag in flagNames" ng-value="flag">
+  </datalist>
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -3,6 +3,7 @@ storiesApp.controller('BuildController',
   $scope.curr = {};
   $scope.nodes = storyService.story.nodes;
   $scope.edges = storyService.story.edges;
+  $scope.flagNames = [];
 
   $scope.goToNode = function(nodeId) {
     $scope.curr = storyService.findNode(nodeId);
@@ -16,7 +17,11 @@ storiesApp.controller('BuildController',
     return edge.to === $scope.curr.id;
   };
 
-  $scope.saveToLocalStorage = storyService.saveToLocalStorage;
+  $scope.saveToLocalStorage = function() {
+    storyService.saveToLocalStorage;
+    $scope.initFlagNames();
+  };
+
   $scope.findNode = storyService.findNode;
 
   $scope.deleteEdge = function(edge) {
@@ -91,6 +96,7 @@ storiesApp.controller('BuildController',
     var target = new URL(window.location.href).hash;
     $scope.goToNode(target ? parseInt(target.substring(1)) : 0);
     $scope.resetNewOption();
+    $scope.initFlagNames();
   };
 
   $scope.resetNewOption = function() {
@@ -102,6 +108,19 @@ storiesApp.controller('BuildController',
       },
       newNode: {}
     };
+  };
+
+  $scope.initFlagNames = function() {
+    var flagSet = new Set();
+    for (var edge of $scope.edges) {
+      for (var flag of edge.set) {
+        flagSet.add(flag.name);
+      }
+      for (flag of edge.requires) {
+        flagSet.add(flag.name);
+      }
+    }
+    $scope.flagNames = Array.from(flagSet);
   };
 
   $scope.init();
