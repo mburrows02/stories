@@ -33,6 +33,9 @@
         <div ng-cloak class="card">
           <div class="card-body">
             <p class="pb-2" id="text">{{node.text ? node.text : node.label}}</p>
+            <p ng-repeat="condText in node.conditionalText | filter:filterText">
+              {{condText.text}}
+            </p>
             <p ng-repeat="opt in options | filter:filterOptions">
               <button ng-click="selectEdge(opt)" class="btn btn-primary btn-block">
                 {{opt.label}}

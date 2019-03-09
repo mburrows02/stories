@@ -53,6 +53,32 @@
               <label>Text</label>
               <textarea class="form-control" ng-blur="saveToLocalStorage()" rows="6" ng-model="curr.text"></textarea>
             </div>
+
+            <label>Conditional Text</label>
+            <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="curr.conditionalText.push({})">+</button>
+            <div ng-repeat="item in curr.conditionalText track by $index">
+              <div class="form-row">
+                <div class="col">
+                  <input type="text" class="new-option-field form-control" ng-model="item.flagName" list="flagNames">
+                </div>
+                <div class="col-auto">
+                  <select class="custom-select" ng-model="item.flagValue">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="curr.conditionalText.splice($index, 1)">X</button>
+                </div>
+              </div>
+              <div class="form-row mt-1">
+                <div class="col">
+                  <textarea class="form-control" ng-model="item.text"></textarea>
+                </div>
+              </div>
+              <br/>
+            </div>
+
             <button class="btn btn-primary float-right"  data-toggle="modal" data-target="#addEdgeModal">Add Option</button>
           </div>
         </div>
@@ -175,6 +201,33 @@
             Advanced options
           </a>
           <div class="collapse" id="newEdgeAdvanced">
+            <div ng-show="newOption.toNodeType==='new'">
+              <label for="newNodeConditionalText">Conditional Text</label>
+              <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="newOption.newNode.conditionalText.push({})">+</button>
+              <div ng-repeat="item in newOption.newNode.conditionalText track by $index">
+                <div class="form-row">
+                  <div class="col">
+                    <input type="text" class="new-option-field form-control" ng-model="item.flagName" list="flagNames">
+                  </div>
+                  <div class="col-auto">
+                    <select class="custom-select" ng-model="item.flagValue">
+                      <option value="true">true</option>
+                      <option value="false">false</option>
+                    </select>
+                  </div>
+                  <div class="col-auto">
+                    <button class="btn btn-danger btn-sm btn-reg text-monospace rounded-circle" ng-click="newOption.newNode.conditionalText.splice($index, 1)">X</button>
+                  </div>
+                </div>
+                <div class="form-row mt-1">
+                  <div class="col">
+                    <textarea class="form-control" ng-model="item.text"></textarea>
+                  </div>
+                </div>
+                <br/>
+              </div>
+            </div>
+
             <label for="newOptionFlag">Set Flags</label>
             <button class="btn btn-success btn-sm btn-reg text-monospace rounded-circle float-right" ng-click="newOption.option.set.push({})">+</button>
             <div class="form-row" ng-repeat="flag in newOption.option.set track by $index">

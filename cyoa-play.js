@@ -14,6 +14,11 @@ storiesApp.controller('PlayController',
     $scope.options = storyService.findEdgesFromNode(nodeId);
   };
 
+  $scope.filterText = function(item) {
+    return item.text && item.flagName &&
+      (item.flagValue == 'true') == $scope.flags.includes(item.flagName);
+  }
+
   $scope.filterOptions = function(opt) {
     if (opt.requires) {
       for (flag of opt.requires) {

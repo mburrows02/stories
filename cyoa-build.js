@@ -74,10 +74,7 @@ storiesApp.controller('BuildController',
     var destNodeId;
     if ($scope.newOption.toNodeType === 'new') {
       destNodeId = storyService.getNextId();
-      var newNode = {
-        id: destNodeId,
-        label: $scope.newOption.newNode.label
-      };
+      var newNode = Object.assign({id: destNodeId}, $scope.newOption.newNode);
       storyService.story.nodes.push(newNode);
     } else {
       destNodeId = parseInt($scope.newOption.toNodeId);
@@ -106,7 +103,9 @@ storiesApp.controller('BuildController',
         set: [{}],
         requires: [{}]
       },
-      newNode: {}
+      newNode: {
+        conditionalText: [{}]
+      }
     };
   };
 

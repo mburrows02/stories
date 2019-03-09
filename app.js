@@ -9,11 +9,11 @@ storiesApp.factory('story', function() {
     if (!hasStory) {
       storyService.story = {};
       storyService.story.nodes = [
-        { id: 0, label: 'The story starts here...' },
-        { id: 1, label: 'And ends here. Write your own!' }
+        { id: 0, label: 'The story starts here...', conditionalText: [{}] },
+        { id: 1, label: 'And ends here. Write your own!', conditionalText: [{}] }
       ];
       storyService.story.edges = [
-        { id: 0, from: 0, to: 1, label: "Continue"}
+        { id: 0, from: 0, to: 1, label: "Continue", set: [{}], requires: [{}]}
       ];
     }
   };
